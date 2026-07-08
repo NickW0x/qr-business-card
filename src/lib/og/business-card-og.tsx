@@ -3,12 +3,15 @@ import { join } from "node:path";
 
 import { businessCard } from "@/config/business-card";
 
-// Mini ProfileCard dimensions — matches live card aspect ratio (0.718)
-const CARD_WIDTH = 400;
-const CARD_HEIGHT = 557;
-const CARD_RADIUS = 30;
-const FOOTER_INSET = 16;
-const FOOTER_RADIUS = CARD_RADIUS - FOOTER_INSET + 6;
+// Standard Open Graph canvas size
+const OG_WIDTH = 1200;
+const OG_HEIGHT = 630;
+const FOOTER_INSET = 40;
+const FOOTER_RADIUS = 20;
+// Portrait is 864×1152; landscape OG crop trims sides — anchor below center so face stays in frame
+const PORTRAIT_OBJECT_POSITION = "center 58%";
+// Light dim over the photo so header and contact text pop
+const PORTRAIT_DIM_OVERLAY = "rgba(0,0,0,0.28)";
 
 export type BusinessCardOgLayoutProps = {
   name: string;
@@ -16,11 +19,12 @@ export type BusinessCardOgLayoutProps = {
   company: string;
   handle: string;
   status: string;
-  contactText: string;
+  email: string;
+  phone: string;
+  websiteLabel: string;
   portraitSrc: string;
   logoSrc: string;
-  siteLabel: string;
-  behindGlowColor: string;
+  innerGradient: string;
 };
 
 // Map a /public URL to an on-disk path under public/
@@ -31,21 +35,41 @@ function publicPathToFs(publicPath: string): string {
 // Embed a local public asset as a data URI for Satori <img src>
 async function readPublicImageAsDataUri(publicPath: string): Promise<string> {
   const fsPath = publicPathToFs(publicPath);
-  const data = await readFile(fsPath, "base64");
-  const ext = publicPath.split(".").pop()?.toLowerCase();
-  const mime =
-    ext === "png"
-      ? "image/png"
-      : ext === "webp"
-        ? "image/webp"
-        : "image/jpeg";
+  const data = await readFile(fsPath);
+  const mime = detectImageMime(data, publicPath);
 
-  return `data:${mime};base64,${data}`;
+  return `data:${mime};base64,${data.toString("base64")}`;
 }
 
-// Strip protocol for a compact domain label (e.g. opensocket.xyz)
-function getSiteLabel(siteUrl: string): string {
-  return siteUrl.replace(/^https?:\/\//, "").replace(/\/$/, "");
+// Detect MIME from magic bytes — some assets use mismatched extensions (e.g. logo.png is JPEG)
+function detectImageMime(data: Buffer, publicPath: string): string {
+  if (data[0] === 0x89 && data[1] === 0x50 && data[2] === 0x4e && data[3] === 0x47) {
+    return "image/png";
+  }
+  if (data[0] === 0xff && data[1] === 0xd8) {
+    return "image/jpeg";
+  }
+  if (
+    data[0] === 0x52 &&
+    data[1] === 0x49 &&
+    data[2] === 0x46 &&
+    data[3] === 0x46
+  ) {
+    return "image/webp";
+  }
+
+  const ext = publicPath.split(".").pop()?.toLowerCase();
+  if (ext === "png") return "image/png";
+  if (ext === "webp") return "image/webp";
+  return "image/jpeg";
+}
+
+// Compact domain label for website row (e.g. helionova.io)
+function getWebsiteLabel(website: string): string {
+  return website
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/$/, "");
 }
 
 // Load OG assets and resolve display copy from business-card config
@@ -65,329 +89,397 @@ export async function getBusinessCardOgAssets(): Promise<BusinessCardOgLayoutPro
     company: profileCard.company ?? businessCard.company,
     handle: profileCard.handle,
     status: profileCard.status,
-    contactText: profileCard.contactText,
+    email: businessCard.email,
+    phone: businessCard.phone.replace(/^\+1\s?/, ""),
+    websiteLabel: getWebsiteLabel(businessCard.website),
     portraitSrc,
     logoSrc,
-    siteLabel: getSiteLabel(businessCard.siteUrl),
-    behindGlowColor: profileCard.behindGlowColor,
+    innerGradient: profileCard.innerGradient,
   };
 }
 
-// Centered mini ProfileCard — all multi-child divs use display:flex (Satori requirement)
+type OgContactFieldProps = {
+  label: string;
+  value: string;
+  icon: "mail" | "phone" | "globe";
+  accent: string;
+};
+
+// Single contact row — label + value with icon badge (business card field)
+function OgContactField({ label, value, icon, accent }: OgContactFieldProps) {
+  const iconColor = accent;
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        flex: 1,
+        minWidth: 0,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          marginBottom: 8,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            border: `1px solid ${accent}44`,
+            background: `${accent}18`,
+            marginRight: 10,
+          }}
+        >
+          {icon === "mail" ? (
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth={2}>
+              <path d="M4 7l8 6 8-6M4 7v10h16V7H4z" />
+            </svg>
+          ) : icon === "phone" ? (
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth={2}>
+              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+            </svg>
+          ) : (
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth={2}>
+              <circle cx={12} cy={12} r={10} />
+              <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+            </svg>
+          )}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.18em",
+            color: "#94a3b8",
+            textTransform: "uppercase",
+          }}
+        >
+          {label}
+        </div>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          fontSize: 15,
+          fontWeight: 600,
+          color: "#f8fafc",
+          lineHeight: 1.3,
+          paddingLeft: 42,
+        }}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+// Full-bleed portrait OG card — all multi-child divs use display:flex (Satori requirement)
 export function BusinessCardOgLayout({
   name,
   title,
   company,
   handle,
   status,
-  contactText,
+  email,
+  phone,
+  websiteLabel,
   portraitSrc,
   logoSrc,
-  siteLabel,
-  behindGlowColor,
+  innerGradient,
 }: BusinessCardOgLayoutProps) {
   return (
     <div
       style={{
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        width: "100%",
-        height: "100%",
+        width: OG_WIDTH,
+        height: OG_HEIGHT,
         backgroundColor: "#020617",
         fontFamily: "Montserrat",
         position: "relative",
         overflow: "hidden",
       }}
     >
-      {/* Galaxy background */}
+      {/* Layer stack — portrait + overlays */}
       <div
         style={{
           display: "flex",
           position: "absolute",
           top: 0,
           left: 0,
-          width: 1200,
-          height: 630,
+          width: OG_WIDTH,
+          height: OG_HEIGHT,
         }}
       >
+        <img
+          src={portraitSrc}
+          alt=""
+          width={OG_WIDTH}
+          height={OG_HEIGHT}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: OG_WIDTH,
+            height: OG_HEIGHT,
+            objectFit: "cover",
+            objectPosition: PORTRAIT_OBJECT_POSITION,
+          }}
+        />
+
+        {/* Subtle opacity dim on portrait — improves text contrast without hiding the photo */}
         <div
           style={{
             display: "flex",
             position: "absolute",
             top: 0,
             left: 0,
-            width: 1200,
-            height: 630,
-            backgroundImage:
-              "radial-gradient(1.5px 1.5px at 8% 12%, rgba(255,255,255,0.9) 50%, transparent 50%), radial-gradient(1px 1px at 22% 38%, rgba(186,230,253,0.8) 50%, transparent 50%), radial-gradient(1.5px 1.5px at 35% 8%, rgba(255,255,255,0.7) 50%, transparent 50%), radial-gradient(1px 1px at 48% 55%, rgba(255,255,255,0.6) 50%, transparent 50%), radial-gradient(1px 1px at 62% 22%, rgba(125,211,252,0.75) 50%, transparent 50%), radial-gradient(1.5px 1.5px at 75% 68%, rgba(255,255,255,0.85) 50%, transparent 50%), radial-gradient(1px 1px at 88% 15%, rgba(255,255,255,0.65) 50%, transparent 50%), radial-gradient(1px 1px at 15% 72%, rgba(255,255,255,0.55) 50%, transparent 50%), radial-gradient(1.5px 1.5px at 55% 82%, rgba(186,230,253,0.7) 50%, transparent 50%), radial-gradient(1px 1px at 92% 48%, rgba(255,255,255,0.6) 50%, transparent 50%)",
+            width: OG_WIDTH,
+            height: OG_HEIGHT,
+            backgroundColor: PORTRAIT_DIM_OVERLAY,
           }}
         />
-        <div
-          style={{
-            display: "flex",
-            position: "absolute",
-            top: 55,
-            left: 340,
-            width: 520,
-            height: 520,
-            borderRadius: 260,
-            background: behindGlowColor,
-            opacity: 0.5,
-          }}
-        />
+
         <div
           style={{
             display: "flex",
             position: "absolute",
             top: 0,
             left: 0,
-            width: 1200,
-            height: 630,
+            width: OG_WIDTH,
+            height: OG_HEIGHT,
+            backgroundImage: innerGradient,
+            backgroundColor: "rgba(0,0,0,0.2)",
+            opacity: 0.42,
+          }}
+        />
+
+        <div
+          style={{
+            display: "flex",
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            width: OG_WIDTH,
+            height: 280,
             background:
-              "linear-gradient(180deg, rgba(2,6,23,0.25) 0%, transparent 35%, transparent 65%, rgba(2,6,23,0.55) 100%)",
+              "linear-gradient(0deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)",
+          }}
+        />
+
+        <div
+          style={{
+            display: "flex",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: OG_WIDTH,
+            height: 220,
+            background:
+              "linear-gradient(180deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.45) 55%, transparent 100%)",
           }}
         />
       </div>
 
-      {/* Card + domain label */}
+      {/* Header — brand logo + name / title / company */}
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          position: "relative",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: OG_WIDTH,
+          padding: "36px 48px 16px",
+          textAlign: "center",
         }}
       >
-        {/* Mini ProfileCard */}
+        <img
+          src={logoSrc}
+          alt=""
+          width={64}
+          height={64}
+          style={{
+            objectFit: "contain",
+            marginBottom: 14,
+          }}
+        />
         <div
           style={{
             display: "flex",
-            position: "relative",
-            width: CARD_WIDTH,
-            height: CARD_HEIGHT,
-            borderRadius: CARD_RADIUS,
-            overflow: "hidden",
-            backgroundColor: "rgba(0,0,0,0.9)",
-            boxShadow:
-              "0 24px 64px rgba(0,0,0,0.65), 0 0 48px rgba(56,189,248,0.12)",
+            fontSize: 48,
+            fontWeight: 700,
+            color: "#ffffff",
+            lineHeight: 1.05,
+            letterSpacing: "-0.02em",
           }}
         >
-          {/* Layer stack — all card visuals */}
+          {name}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            fontSize: 22,
+            fontWeight: 500,
+            color: "rgba(255,255,255,0.9)",
+            lineHeight: 1.35,
+            marginTop: 10,
+          }}
+        >
+          {title}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            fontSize: 18,
+            fontWeight: 500,
+            color: "rgba(186,230,253,0.85)",
+            lineHeight: 1.35,
+            marginTop: 6,
+            letterSpacing: "0.035em",
+          }}
+        >
+          {company}
+        </div>
+      </div>
+
+      {/* Business card contact panel */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          position: "absolute",
+          bottom: FOOTER_INSET,
+          left: FOOTER_INSET,
+          width: OG_WIDTH - FOOTER_INSET * 2,
+          padding: "18px 24px 20px",
+          borderRadius: FOOTER_RADIUS,
+          border: "1px solid rgba(255,255,255,0.22)",
+          background:
+            "linear-gradient(135deg, rgba(15,23,42,0.38) 0%, rgba(30,58,95,0.48) 100%)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.28)",
+        }}
+      >
+        {/* Identity row — logo, handle, location */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            paddingBottom: 16,
+            borderBottom: "1px solid rgba(255,255,255,0.12)",
+            marginBottom: 18,
+          }}
+        >
           <div
             style={{
               display: "flex",
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: CARD_WIDTH,
-              height: CARD_HEIGHT,
+              alignItems: "center",
+              justifyContent: "center",
+              width: 52,
+              height: 52,
+              borderRadius: 12,
+              border: "2px solid rgba(56,189,248,0.35)",
+              backgroundColor: "rgba(15,23,42,0.35)",
+              overflow: "hidden",
+              marginRight: 14,
+              boxShadow: "0 0 16px rgba(56,189,248,0.2)",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: CARD_WIDTH,
-                height: CARD_HEIGHT,
-                backgroundImage:
-                  "linear-gradient(145deg, rgba(96, 73, 110, 0.55) 0%, rgba(113, 196, 255, 0.27) 100%)",
-                backgroundColor: "rgba(0,0,0,0.9)",
-              }}
-            />
             <img
-              src={portraitSrc}
+              src={logoSrc}
               alt=""
-              width={CARD_WIDTH}
-              height={CARD_HEIGHT}
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: CARD_WIDTH,
-                height: CARD_HEIGHT,
-                objectFit: "cover",
-                objectPosition: "center bottom",
-              }}
-            />
-            <div
-              style={{
-                display: "flex",
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: CARD_WIDTH,
-                height: 180,
-                background:
-                  "linear-gradient(180deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.4) 55%, transparent 100%)",
-              }}
+              width={44}
+              height={44}
+              style={{ objectFit: "contain" }}
             />
           </div>
-
-          {/* Header text */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              alignItems: "center",
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: CARD_WIDTH,
-              padding: "40px 24px 16px",
-              textAlign: "center",
+              justifyContent: "center",
             }}
           >
             <div
               style={{
                 display: "flex",
-                fontSize: 36,
+                fontSize: 17,
                 fontWeight: 700,
                 color: "#ffffff",
-                lineHeight: 1.05,
-                letterSpacing: "-0.02em",
+                lineHeight: 1.2,
               }}
             >
-              {name}
-            </div>
-            <div
-              style={{
-                display: "flex",
-                fontSize: 16,
-                fontWeight: 500,
-                color: "rgba(255,255,255,0.9)",
-                lineHeight: 1.35,
-                marginTop: 8,
-              }}
-            >
-              {title}
+              @{handle}
             </div>
             <div
               style={{
                 display: "flex",
                 fontSize: 14,
                 fontWeight: 500,
-                color: "rgba(186,230,253,0.85)",
-                lineHeight: 1.35,
-                marginTop: 4,
-                letterSpacing: "0.035em",
+                color: "#cbd5e1",
+                lineHeight: 1.2,
+                marginTop: 5,
               }}
             >
-              {company}
-            </div>
-          </div>
-
-          {/* Glass footer */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              position: "absolute",
-              bottom: FOOTER_INSET,
-              left: FOOTER_INSET,
-              width: CARD_WIDTH - FOOTER_INSET * 2,
-              padding: "12px 14px",
-              borderRadius: FOOTER_RADIUS,
-              border: "1px solid rgba(255,255,255,0.25)",
-              background:
-                "linear-gradient(135deg, rgba(0,0,0,0.72) 0%, rgba(15,23,42,0.82) 100%)",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.55)",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  border: "2px solid rgba(255,255,255,0.25)",
-                  backgroundColor: "#000000",
-                  overflow: "hidden",
-                  marginRight: 10,
-                }}
-              >
-                <img
-                  src={logoSrc}
-                  alt=""
-                  width={32}
-                  height={32}
-                  style={{ objectFit: "contain" }}
-                />
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: "#ffffff",
-                    lineHeight: 1,
-                  }}
-                >
-                  @{handle}
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    fontSize: 11,
-                    fontWeight: 500,
-                    color: "#cbd5e1",
-                    lineHeight: 1,
-                    marginTop: 4,
-                  }}
-                >
-                  {status}
-                </div>
-              </div>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "8px 14px",
-                borderRadius: 8,
-                border: "1px solid rgba(56,189,248,0.4)",
-                background: "rgba(14,165,233,0.25)",
-                fontSize: 11,
-                fontWeight: 700,
-                color: "#ffffff",
-                boxShadow: "0 0 20px rgba(56,189,248,0.25)",
-              }}
-            >
-              {contactText}
+              {status}
             </div>
           </div>
         </div>
 
+        {/* Contact fields — email, phone, website */}
         <div
           style={{
             display: "flex",
-            marginTop: 20,
-            fontSize: 15,
-            fontWeight: 500,
-            color: "#64748b",
-            letterSpacing: "0.04em",
+            flexDirection: "row",
+            width: "100%",
           }}
         >
-          {siteLabel}
+          <OgContactField
+            label="Email"
+            value={email}
+            icon="mail"
+            accent="#38bdf8"
+          />
+          <div
+            style={{
+              display: "flex",
+              width: 1,
+              background: "rgba(255,255,255,0.1)",
+              marginLeft: 20,
+              marginRight: 20,
+            }}
+          />
+          <OgContactField
+            label="Phone"
+            value={phone}
+            icon="phone"
+            accent="#34d399"
+          />
+          <div
+            style={{
+              display: "flex",
+              width: 1,
+              background: "rgba(255,255,255,0.1)",
+              marginLeft: 20,
+              marginRight: 20,
+            }}
+          />
+          <OgContactField
+            label="Website"
+            value={websiteLabel}
+            icon="globe"
+            accent="#a78bfa"
+          />
         </div>
       </div>
     </div>
