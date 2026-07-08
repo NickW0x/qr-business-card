@@ -4,7 +4,7 @@ import { ProfileCardSection } from "@/components/business-card/profile-card-sect
 // Full business card view shown after scanning the QR code
 export function BusinessCardView() {
   return (
-    <div className="flex w-full max-w-md flex-col items-center gap-6">
+    <div className="flex w-full max-w-md flex-col items-center gap-6 px-1 sm:px-0">
       <ProfileCardSection />
       <ContactActions />
     </div>

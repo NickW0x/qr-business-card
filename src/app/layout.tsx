@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Montserrat } from "next/font/google";
 
 import { businessCard } from "@/config/business-card";
@@ -28,7 +28,19 @@ export const metadata: Metadata = {
     siteName: businessCard.name,
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: businessCard.photo,
+        width: 400,
+        height: 400,
+        alt: businessCard.name,
+      },
+    ],
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#020617",
 };
 
 export default function RootLayout({

@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 // Business card page — destination when someone scans the QR code
 export default function CardPage() {
   return (
-    <div className="relative flex min-h-full flex-1 flex-col items-center justify-center gap-6 px-4 py-10">
+    <div className="relative flex min-h-full flex-1 flex-col items-center justify-start gap-6 px-5 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-10">
       <GalaxyBackground />
       <div className="relative z-10">
         <BusinessCardView />

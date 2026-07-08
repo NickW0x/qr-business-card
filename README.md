@@ -23,13 +23,13 @@ Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_SITE_URL=http://localho
 
 ## Deploy to Vercel
 
-The project is already linked to `nickw0xs-projects/qr-business-card`.
+The project is hosted at [https://opensocket.xyz](https://opensocket.xyz).
 
 ```bash
 npx vercel login
 npx vercel --prod
 ```
 
-After the first deploy, set `NEXT_PUBLIC_SITE_URL` in the Vercel dashboard to your production URL (e.g. `https://qr-business-card.vercel.app`), then redeploy so the QR encodes the correct `/card` link.
+Production QR codes encode `https://opensocket.xyz/card` via `siteUrl` in [`src/config/business-card.ts`](src/config/business-card.ts). For belt-and-suspenders, also set `NEXT_PUBLIC_SITE_URL=https://opensocket.xyz` in the Vercel **Production** environment and redeploy.
 
 Alternatively, push to GitHub and import the repo at [vercel.com/new](https://vercel.com/new).

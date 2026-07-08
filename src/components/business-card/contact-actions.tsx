@@ -37,11 +37,15 @@ function ContactRow({
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
-      className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/5 px-4 py-3.5 text-white transition-colors hover:border-white/20 hover:bg-white/10"
+      className="flex min-w-0 flex-col gap-0.5 rounded-xl border border-white/8 bg-white/5 px-4 py-3.5 text-white transition-colors hover:border-white/20 hover:bg-white/10 sm:flex-row sm:items-center sm:gap-3"
     >
-      <Icon className="size-5 shrink-0 text-slate-300" />
-      <span className="text-sm font-medium text-white/90">{label}</span>
-      <span className="ml-auto truncate text-sm text-slate-200">{value}</span>
+      <div className="flex min-w-0 items-center gap-3">
+        <Icon className="size-5 shrink-0 text-slate-300" />
+        <span className="text-sm font-medium text-white/90">{label}</span>
+      </div>
+      <span className="min-w-0 break-all pl-8 text-sm text-slate-200 sm:ml-auto sm:truncate sm:pl-0 sm:text-right">
+        {value}
+      </span>
     </a>
   );
 }
@@ -52,7 +56,7 @@ export function ContactActions() {
 
   return (
     <SpotlightCard
-      className="w-full! max-w-md! rounded-2xl! border-white/10! bg-black/30! p-6! shadow-xl backdrop-blur-sm"
+      className="w-full max-w-md rounded-2xl! border-white/10! bg-black/30! p-6! shadow-xl backdrop-blur-sm"
       spotlightColor="rgba(125, 190, 255, 0.18)"
     >
       <div className="space-y-6">

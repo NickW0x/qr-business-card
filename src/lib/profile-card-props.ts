@@ -25,8 +25,8 @@ export function getProfileCardProps() {
     mobileTiltSensitivity: profileCard.mobileTiltSensitivity,
     miniAvatarUrl: profileCard.miniAvatarUrl,
     name: profileCard.name ?? businessCard.name,
-    title:
-      profileCard.title ?? `${businessCard.title} · ${businessCard.company}`,
+    title: profileCard.title ?? businessCard.title,
+    company: profileCard.company ?? businessCard.company,
     handle: profileCard.handle,
     status: profileCard.status,
     contactText: profileCard.contactText,

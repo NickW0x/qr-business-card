@@ -53,6 +53,7 @@ interface ProfileCardProps {
   miniAvatarUrl?: string;
   name?: string;
   title?: string;
+  company?: string;
   handle?: string;
   status?: string;
   contactText?: string;
@@ -90,6 +91,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
   miniAvatarUrl,
   name = 'Javi A. Torres',
   title = 'Software Engineer',
+  company,
   handle = 'javicodes',
   status = 'Online',
   contactText = 'Contact',
@@ -460,7 +462,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
   return (
     <div
       ref={wrapRef}
-      className={`relative touch-none ${className}`.trim()}
+      className={`relative max-w-full ${enableTilt ? "touch-none" : "touch-pan-y"} ${className}`.trim()}
       style={{ perspective: '900px', transform: 'translate3d(0, 0, 0.1px)', ...cardStyle } as React.CSSProperties}
     >
       {behindGlowEnabled && (
@@ -477,8 +479,10 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
         <section
           className="grid relative overflow-hidden"
           style={{
-            height: '80svh',
-            maxHeight: '540px',
+            height: 'min(72svh, 480px)',
+            maxHeight: '480px',
+            width: '100%',
+            maxWidth: '100%',
             aspectRatio: '0.718',
             borderRadius: cardRadius,
             backgroundBlendMode: 'color-dodge, normal, normal, normal',
@@ -577,9 +581,9 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                   />
                   <div className="relative z-1 flex w-full min-w-0 items-center justify-between gap-2">
                     <div className="flex min-w-0 flex-1 items-center gap-2 transition-opacity duration-300 group-hover/footer:opacity-100 group-hover/card:opacity-100">
-                      <div className="size-10 shrink-0 overflow-hidden rounded-full border-2 border-white/25 bg-black shadow-sm transition-colors duration-300 group-hover/footer:border-white/45 group-hover/card:border-white/35">
+                      <div className="size-10 shrink-0 overflow-hidden rounded-full border-2 border-white/25 bg-black shadow-sm transition-all duration-300 group-hover/footer:border-sky-400/55 group-hover/footer:shadow-[0_0_16px_rgba(56,189,248,0.55),0_0_6px_rgba(56,189,248,0.35)] group-hover/card:border-sky-400/45 group-hover/card:shadow-[0_0_12px_rgba(56,189,248,0.4),0_0_4px_rgba(56,189,248,0.25)]">
                         <Image
-                          className="h-full w-full rounded-full object-contain p-1"
+                          className="h-full w-full rounded-full object-contain p-1 transition-[filter] duration-300 group-hover/footer:brightness-110 group-hover/card:brightness-105"
                           src={miniAvatarUrl || avatarUrl}
                           alt={`${name || 'User'} mini avatar`}
                           width={48}
@@ -631,24 +635,33 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                 className="pointer-events-none absolute inset-x-0 top-0 z-1 h-44 bg-linear-to-b from-black/75 via-black/40 to-transparent"
                 style={{ borderRadius: `${cardRadius} ${cardRadius} 0 0` }}
               />
-              <div className="absolute inset-x-0 top-0 z-2 flex flex-col items-center gap-2 px-6 pt-10 pb-4 text-center pointer-events-auto">
+              <div className="absolute inset-x-0 top-0 z-2 flex flex-col items-center gap-1.5 px-6 pt-10 pb-4 text-center pointer-events-auto">
                 <h3
-                  className="m-0 max-w-[92%] font-bold leading-none tracking-tight text-white"
+                  className="m-0 max-w-[92%] font-semibold leading-none tracking-[-0.02em] text-white"
                   style={{
                     fontSize: 'clamp(1.5rem, 4.5svh, 2.5rem)',
-                    textShadow: '0 2px 16px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,0.8)'
+                    textShadow:
+                      '0 2px 18px rgba(0,0,0,0.85), 0 1px 2px rgba(0,0,0,0.6), 0 0 32px rgba(56,189,248,0.12)'
                   }}
                 >
                   {name}
                 </h3>
-                <p
-                  className="m-0 max-w-[92%] text-sm font-medium leading-snug text-slate-100 sm:text-[0.9375rem]"
-                  style={{
-                    textShadow: '0 1px 10px rgba(0,0,0,0.85)'
-                  }}
-                >
-                  {title}
-                </p>
+                <div className="flex max-w-[92%] flex-col gap-1">
+                  <p
+                    className="m-0 text-sm font-medium leading-snug tracking-[0.01em] text-white/90 sm:text-[0.9375rem]"
+                    style={{ textShadow: '0 1px 12px rgba(0,0,0,0.8)' }}
+                  >
+                    {title}
+                  </p>
+                  {company ? (
+                    <p
+                      className="m-0 text-xs font-normal leading-snug tracking-[0.035em] text-sky-100/80 sm:text-[0.8125rem]"
+                      style={{ textShadow: '0 1px 10px rgba(0,0,0,0.75)' }}
+                    >
+                      {company}
+                    </p>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>

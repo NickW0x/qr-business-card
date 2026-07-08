@@ -24,6 +24,7 @@ export const businessCard = {
   name: "Nick White",
   title: "Founder + Chief Engineer",
   company: "HelioNova",
+  siteUrl: "https://opensocket.xyz",
   bio: "Founder and Chief Engineer at HelioNova. Designing and building AI systems.",
   email: "nw@helionova.io",
   phone: "+1 339-234-0959",
@@ -109,11 +110,12 @@ export const businessCard = {
     className: "mx-auto",
 
     enableTilt: true,
-    enableMobileTilt: true,
+    enableMobileTilt: false,
     mobileTiltSensitivity: 2,
 
     name: undefined as string | undefined,
-    title: "Founder + Chief Engineer | HelioNova" as string | undefined,
+    title: undefined as string | undefined,
+    company: undefined as string | undefined,
     handle: "nick_white",
     status: "Boston, MA",
     contactText: "Connect",

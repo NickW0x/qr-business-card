@@ -8,14 +8,16 @@ import { businessCard } from "@/config/business-card";
 type QrDisplayProps = {
   url: string;
   size?: number;
+  variant?: "default" | "premium";
 };
 
 // Render a polished, styled QR code to canvas
-export function QrDisplay({ url, size = 280 }: QrDisplayProps) {
+export function QrDisplay({ url, size = 280, variant = "default" }: QrDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    if (!container) return;
 
     const qrCode = new QRCodeStyling({
       width: size,
@@ -49,20 +51,23 @@ export function QrDisplay({ url, size = 280 }: QrDisplayProps) {
       },
     });
 
-    containerRef.current.innerHTML = "";
-    qrCode.append(containerRef.current);
+    container.innerHTML = "";
+    qrCode.append(container);
 
     return () => {
-      if (containerRef.current) {
-        containerRef.current.innerHTML = "";
-      }
+      container.innerHTML = "";
     };
   }, [url, size]);
+
+  const frameClassName =
+    variant === "premium"
+      ? "rounded-2xl bg-white p-3"
+      : "rounded-2xl bg-white p-3 shadow-lg ring-1 ring-black/5";
 
   return (
     <div
       ref={containerRef}
-      className="rounded-2xl bg-white p-3 shadow-lg ring-1 ring-black/5"
+      className={frameClassName}
       aria-label={`QR code linking to ${url}`}
     />
   );
