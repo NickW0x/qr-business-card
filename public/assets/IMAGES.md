@@ -11,7 +11,9 @@ Drop your files into the folders below, then update paths in `src/config/busines
 ```
 public/assets/
 ├── brand/
-│   └── logo.png              ← YOUR LOGO (optional)
+│   ├── logo.png              ← HelioNova logo (QR center, card footer, logo loop)
+│   ├── voltedge.png          ← VoltEdge product logo (logo loop)
+│   └── tradecraft.png        ← Tradecraft product logo (logo loop)
 ├── profile/
 │   ├── portrait.jpg          ← YOUR PHOTO (required — main headshot)
 │   └── avatar.jpg            ← Square crop (optional — see below)
@@ -28,8 +30,10 @@ public/assets/
 |------|----------|-------------------|
 | **`profile/portrait.jpg`** | Large hero image on the holographic ProfileCard (`/card`) | Portrait JPG/PNG/WebP, ~800×1200px, you facing camera |
 | **`profile/avatar.jpg`** | QR code center image, vCard contact photo, link previews (OG/Twitter), small circle on card footer | Square JPG/PNG, ~400×400px, head & shoulders crop |
-| **`brand/logo.png`** | Optional — use as QR center instead of avatar if you prefer logo over face | Square PNG/SVG with transparent background, ~512×512px |
-| **`profile-card/iconpattern.png`** | Holographic pattern overlay on the card (visual effect only) | Pre-installed — leave as-is |
+| **`brand/logo.png`** | HelioNova logo — QR center, card footer mini avatar, logo loop | Square PNG with transparent background, ~512×512px |
+| **`brand/voltedge.png`** | VoltEdge product logo in the animated logo loop | PNG with transparent background |
+| **`brand/tradecraft.png`** | Tradecraft product logo in the animated logo loop | PNG with transparent background |
+| **`profile-card/iconpattern.png`** | Holographic pattern overlay on the card (visual effect only) | Pre-installed — tune intensity via `profileCard.iconOverlay` in config |
 | **`profile-card/grain.webp`** | Film grain overlay on the card (visual effect only) | Pre-installed — leave as-is |
 
 ---

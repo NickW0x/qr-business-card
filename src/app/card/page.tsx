@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { BusinessCardView } from "@/components/business-card-view";
+import { GalaxyBackground } from "@/components/backgrounds/galaxy-background";
 import { businessCard } from "@/config/business-card";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -32,8 +33,11 @@ export const metadata: Metadata = {
 // Business card page — destination when someone scans the QR code
 export default function CardPage() {
   return (
-    <div className="flex min-h-full flex-1 flex-col items-center justify-center gap-6 bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 px-4 py-10">
-      <BusinessCardView />
+    <div className="relative flex min-h-full flex-1 flex-col items-center justify-center gap-6 px-4 py-10">
+      <GalaxyBackground />
+      <div className="relative z-10">
+        <BusinessCardView />
+      </div>
     </div>
   );
 }

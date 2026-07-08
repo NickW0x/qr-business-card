@@ -3,11 +3,18 @@ import { businessCard } from "@/config/business-card";
 // Returns every ProfileCard prop — single place to tweak mapping logic
 export function getProfileCardProps() {
   const { profileCard } = businessCard;
+  const { iconOverlay } = profileCard;
 
   return {
     avatarUrl: profileCard.avatarUrl ?? businessCard.photo,
     iconUrl: profileCard.iconUrl || undefined,
     grainUrl: profileCard.grainUrl || undefined,
+    iconMaskSize: iconOverlay.iconMaskSize,
+    iconOpacity: iconOverlay.iconOpacity,
+    iconBrightness: iconOverlay.iconBrightness,
+    iconContrast: iconOverlay.iconContrast,
+    iconSaturate: iconOverlay.iconSaturate,
+    iconBlendMode: iconOverlay.iconBlendMode,
     innerGradient: profileCard.innerGradient,
     behindGlowEnabled: profileCard.behindGlowEnabled,
     behindGlowColor: profileCard.behindGlowColor,
