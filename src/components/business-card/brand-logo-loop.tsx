@@ -32,6 +32,19 @@ function toLogoItem(entry: LogoLoopEntry): LogoItem | null {
     };
   }
 
+  // Domain-style product labels (no logo asset yet)
+  if (entry.kind === "text") {
+    return {
+      node: (
+        <span className="whitespace-nowrap text-[15px] font-semibold tracking-tight text-white/85">
+          {entry.label}
+        </span>
+      ),
+      href: entry.href,
+      ariaLabel: entry.ariaLabel,
+    };
+  }
+
   return {
     node: iconNodes[entry.icon],
     href: entry.href,

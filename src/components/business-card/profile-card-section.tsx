@@ -3,6 +3,7 @@
 import ProfileCard from "@/components/ProfileCard";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import {
+  getBookingClickHandler,
   getContactClickHandler,
   getProfileCardProps,
 } from "@/lib/profile-card-props";
@@ -22,6 +23,7 @@ export function ProfileCardSection() {
       enableTilt={props.enableTilt && tiltAllowed}
       enableMobileTilt={props.enableMobileTilt && tiltAllowed}
       onContactClick={getContactClickHandler()}
+      onBookingClick={getBookingClickHandler()}
     />
   );
 }

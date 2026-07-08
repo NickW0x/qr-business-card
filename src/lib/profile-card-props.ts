@@ -30,6 +30,7 @@ export function getProfileCardProps() {
     handle: profileCard.handle,
     status: profileCard.status,
     contactText: profileCard.contactText,
+    bookingText: businessCard.bookingText,
     showUserInfo: profileCard.showUserInfo,
   };
 }
@@ -56,4 +57,11 @@ export function getContactClickHandler(): () => void {
         window.location.href = `mailto:${businessCard.email}`;
       };
   }
+}
+
+// Opens Cal.com booking page in a new tab
+export function getBookingClickHandler(): () => void {
+  return () => {
+    window.open(businessCard.bookingUrl, "_blank", "noopener,noreferrer");
+  };
 }

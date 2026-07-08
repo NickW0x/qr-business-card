@@ -18,7 +18,18 @@ export type LogoLoopEntry =
       icon: LogoLoopIcon;
       href: string;
       ariaLabel: string;
+    }
+  | {
+      // Text label when a product logo asset is not available yet
+      kind: "text";
+      label: string;
+      href: string;
+      ariaLabel: string;
     };
+
+// Cal.com 30-min booking — shared by ProfileCard footer + logo loop
+const bookingUrl = "https://cal.com/nicholas-white-8ztpjq/30min";
+const bookingText = "Book";
 
 export const businessCard = {
   name: "Nick White",
@@ -29,6 +40,8 @@ export const businessCard = {
   email: "nw@helionova.io",
   phone: "+1 339-234-0959",
   website: "https://helionova.io",
+  bookingUrl,
+  bookingText,
   // Default photo — used for QR center, vCard, and link previews (OG/Twitter)
   photo: "/assets/brand/logo.png",
   social: {
@@ -57,6 +70,18 @@ export const businessCard = {
       ariaLabel: "Tradecraft",
     },
     {
+      kind: "image",
+      src: "/assets/brand/servicesocket.png",
+      href: "https://servicesocket.ai",
+      ariaLabel: "ServiceSocket",
+    },
+    {
+      kind: "image",
+      src: "/assets/brand/agentzero.png",
+      href: "https://agentzero.bot",
+      ariaLabel: "Agent Zero",
+    },
+    {
       kind: "icon",
       icon: "linkedin",
       href: "https://www.linkedin.com/in/nicholas-white-3b32026/",
@@ -77,7 +102,7 @@ export const businessCard = {
     {
       kind: "icon",
       icon: "cal",
-      href: "https://cal.com/nicholas-white-8ztpjq/30min",
+      href: bookingUrl,
       ariaLabel: "Book a meeting on Cal.com",
     },
   ] satisfies LogoLoopEntry[],

@@ -13,7 +13,9 @@ public/assets/
 ├── brand/
 │   ├── logo.png              ← HelioNova logo (QR center, card footer, logo loop)
 │   ├── voltedge.png          ← VoltEdge product logo (logo loop)
-│   └── tradecraft.png        ← Tradecraft product logo (logo loop)
+│   ├── tradecraft.png        ← Tradecraft product logo (logo loop)
+│   ├── servicesocket.png     ← ServiceSocket product logo (logo loop)
+│   └── agentzero.png         ← Agent Zero product logo (logo loop)
 ├── profile/
 │   ├── portrait.jpg          ← YOUR PHOTO (required — main headshot)
 │   └── avatar.jpg            ← Square crop (optional — see below)
@@ -33,6 +35,8 @@ public/assets/
 | **`brand/logo.png`** | HelioNova logo — QR center, card footer mini avatar, logo loop | Square PNG with transparent background, ~512×512px |
 | **`brand/voltedge.png`** | VoltEdge product logo in the animated logo loop | PNG with transparent background |
 | **`brand/tradecraft.png`** | Tradecraft product logo in the animated logo loop | PNG with transparent background |
+| **`brand/servicesocket.png`** | ServiceSocket product logo in the animated logo loop | PNG with transparent background |
+| **`brand/agentzero.png`** | Agent Zero product logo in the animated logo loop | PNG with transparent background |
 | **`profile-card/iconpattern.png`** | Holographic pattern overlay on the card (visual effect only) | Pre-installed — tune intensity via `profileCard.iconOverlay` in config |
 | **`profile-card/grain.webp`** | Film grain overlay on the card (visual effect only) | Pre-installed — leave as-is |
 

@@ -59,8 +59,10 @@ interface ProfileCardProps {
   handle?: string;
   status?: string;
   contactText?: string;
+  bookingText?: string;
   showUserInfo?: boolean;
   onContactClick?: () => void;
+  onBookingClick?: () => void;
 }
 
 interface TiltEngine {
@@ -97,8 +99,10 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
   handle = 'javicodes',
   status = 'Online',
   contactText = 'Contact',
+  bookingText,
   showUserInfo = true,
-  onContactClick
+  onContactClick,
+  onBookingClick
 }) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const shellRef = useRef<HTMLDivElement>(null);
@@ -433,6 +437,11 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     onContactClick?.();
   }, [onContactClick]);
 
+  // Opens Cal.com booking link (wired from business-card config)
+  const handleBookingClick = useCallback((): void => {
+    onBookingClick?.();
+  }, [onBookingClick]);
+
   // Complex styles that require CSS variables and can't be done with Tailwind
   const shineStyle: React.CSSProperties = {
     maskImage: 'var(--icon)',
@@ -646,14 +655,15 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                     }}
                   />
                   <div className="relative z-1 flex w-full min-w-0 items-center justify-between gap-2">
-                    <div className="flex min-w-0 flex-1 items-center gap-2 transition-opacity duration-300 group-hover/footer:opacity-100 group-hover/card:opacity-100">
-                      <div className="size-10 shrink-0 overflow-hidden rounded-full border-2 border-white/25 bg-black shadow-sm transition-all duration-300 group-hover/footer:border-sky-400/55 group-hover/footer:shadow-[0_0_16px_rgba(56,189,248,0.55),0_0_6px_rgba(56,189,248,0.35)] group-hover/card:border-sky-400/45 group-hover/card:shadow-[0_0_12px_rgba(56,189,248,0.4),0_0_4px_rgba(56,189,248,0.25)]">
+                    <div className="flex min-w-0 flex-1 items-center gap-3 transition-opacity duration-300 group-hover/footer:opacity-100 group-hover/card:opacity-100">
+                      {/* Larger mini logo — balances the stacked Email/Book CTAs */}
+                      <div className="size-14 shrink-0 overflow-hidden rounded-full border-2 border-white/25 bg-black shadow-sm transition-all duration-300 group-hover/footer:border-sky-400/55 group-hover/footer:shadow-[0_0_16px_rgba(56,189,248,0.55),0_0_6px_rgba(56,189,248,0.35)] group-hover/card:border-sky-400/45 group-hover/card:shadow-[0_0_12px_rgba(56,189,248,0.4),0_0_4px_rgba(56,189,248,0.25)]">
                         <Image
-                          className="h-full w-full rounded-full object-contain p-1 transition-[filter] duration-300 group-hover/footer:brightness-110 group-hover/card:brightness-105"
+                          className="h-full w-full rounded-full object-contain p-1.5 transition-[filter] duration-300 group-hover/footer:brightness-110 group-hover/card:brightness-105"
                           src={miniAvatarUrl || avatarUrl}
                           alt={`${name || 'User'} mini avatar`}
-                          width={48}
-                          height={48}
+                          width={56}
+                          height={56}
                           style={{ display: 'block', gridArea: 'auto', borderRadius: '50%', pointerEvents: 'auto' }}
                           onError={e => {
                             const t = e.target as HTMLImageElement;
@@ -662,24 +672,38 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                           }}
                         />
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-xs font-bold leading-none text-white transition-colors duration-300 group-hover/footer:text-white group-hover/card:text-slate-50">
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="text-sm font-bold leading-none text-white transition-colors duration-300 group-hover/footer:text-white group-hover/card:text-slate-50">
                           @{handle}
                         </div>
-                        <div className="mt-0.5 text-[11px] font-medium leading-none text-slate-300 transition-colors duration-300 group-hover/footer:text-slate-100 group-hover/card:text-slate-200">
+                        <div className="text-xs font-medium leading-none text-slate-300 transition-colors duration-300 group-hover/footer:text-slate-100 group-hover/card:text-slate-200">
                           {status}
                         </div>
                       </div>
                     </div>
-                    <button
-                      className="relative z-1 shrink-0 cursor-pointer rounded-lg border border-sky-400/40 bg-sky-500/25 px-3 py-2 text-[11px] font-bold text-white shadow-[0_0_20px_rgba(56,189,248,0.25)] transition-all duration-200 ease-out hover:-translate-y-px hover:border-sky-300/70 hover:bg-sky-500/50 hover:shadow-[0_0_28px_rgba(56,189,248,0.45)] group-hover/footer:border-sky-300/55 group-hover/footer:bg-sky-500/35 group-hover/card:border-sky-400/50 group-hover/card:bg-sky-500/30"
-                      onClick={handleContactClick}
-                      style={{ pointerEvents: 'auto', display: 'block', gridArea: 'auto', borderRadius: '8px' }}
-                      type="button"
-                      aria-label={`Email ${name || 'user'}`}
-                    >
-                      {contactText}
-                    </button>
+                    {/* Stacked CTAs — Email on top, Book (Cal.com) below */}
+                    <div className="relative z-1 flex shrink-0 flex-col items-stretch gap-1.5">
+                      <button
+                        className="cursor-pointer rounded-lg border border-sky-400/40 bg-sky-500/25 px-3 py-2 text-[11px] font-bold text-white shadow-[0_0_20px_rgba(56,189,248,0.25)] transition-all duration-200 ease-out hover:-translate-y-px hover:border-sky-300/70 hover:bg-sky-500/50 hover:shadow-[0_0_28px_rgba(56,189,248,0.45)] group-hover/footer:border-sky-300/55 group-hover/footer:bg-sky-500/35 group-hover/card:border-sky-400/50 group-hover/card:bg-sky-500/30"
+                        onClick={handleContactClick}
+                        style={{ pointerEvents: 'auto', display: 'block', gridArea: 'auto', borderRadius: '8px' }}
+                        type="button"
+                        aria-label={`Email ${name || 'user'}`}
+                      >
+                        {contactText}
+                      </button>
+                      {onBookingClick && bookingText ? (
+                        <button
+                          className="cursor-pointer rounded-lg border border-sky-400/40 bg-sky-500/25 px-3 py-2 text-[11px] font-bold text-white shadow-[0_0_20px_rgba(56,189,248,0.25)] transition-all duration-200 ease-out hover:-translate-y-px hover:border-sky-300/70 hover:bg-sky-500/50 hover:shadow-[0_0_28px_rgba(56,189,248,0.45)] group-hover/footer:border-sky-300/55 group-hover/footer:bg-sky-500/35 group-hover/card:border-sky-400/50 group-hover/card:bg-sky-500/30"
+                          onClick={handleBookingClick}
+                          style={{ pointerEvents: 'auto', display: 'block', gridArea: 'auto', borderRadius: '8px' }}
+                          type="button"
+                          aria-label={`Book a 30 minute call with ${name || 'user'}`}
+                        >
+                          {bookingText}
+                        </button>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               )}
