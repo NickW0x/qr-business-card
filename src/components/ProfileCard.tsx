@@ -3,6 +3,8 @@
 import Image from 'next/image';
 import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 
+import { useMediaQuery } from '@/hooks/use-media-query';
+
 const DEFAULT_INNER_GRADIENT = 'linear-gradient(145deg,#60496e8c 0%,#71C4FF44 100%)';
 
 const ANIMATION_CONFIG = {
@@ -100,6 +102,9 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
 }) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const shellRef = useRef<HTMLDivElement>(null);
+
+  // Taller card on sm+; compact height keeps card + contact panel visible on iPhone
+  const isDesktopLayout = useMediaQuery('(min-width: 640px)');
 
   const enterTimerRef = useRef<number | null>(null);
   const leaveRafRef = useRef<number | null>(null);
@@ -353,6 +358,31 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     handleDeviceOrientation
   ]);
 
+  // Touch devices skip tilt — initialize centered vars so the card paints without RAF
+  useEffect(() => {
+    if (enableTilt) return;
+
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+
+    const centeredVars: Record<string, string> = {
+      '--pointer-x': '50%',
+      '--pointer-y': '50%',
+      '--background-x': '50%',
+      '--background-y': '50%',
+      '--pointer-from-center': '0',
+      '--pointer-from-top': '0.5',
+      '--pointer-from-left': '0.5',
+      '--card-opacity': '1',
+      '--rotate-x': '0deg',
+      '--rotate-y': '0deg'
+    };
+
+    for (const [key, value] of Object.entries(centeredVars)) {
+      wrap.style.setProperty(key, value);
+    }
+  }, [enableTilt]);
+
   const cardRadius = '30px';
 
   const cardStyle = useMemo(
@@ -396,10 +426,15 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
   // Complex styles that require CSS variables and can't be done with Tailwind
   const shineStyle: React.CSSProperties = {
     maskImage: 'var(--icon)',
+    WebkitMaskImage: 'var(--icon)',
     maskMode: 'luminance',
     maskRepeat: 'repeat',
+    WebkitMaskRepeat: 'repeat',
     maskSize: iconMaskSize,
+    WebkitMaskSize: iconMaskSize,
     maskPosition: 'top calc(200% - (var(--background-y) * 5)) left calc(100% - var(--background-x))',
+    WebkitMaskPosition:
+      'top calc(200% - (var(--background-y) * 5)) left calc(100% - var(--background-x))',
     filter: `brightness(${iconBrightness}) contrast(${iconContrast}) saturate(${iconSaturate}) opacity(${iconOpacity})`,
     animation: 'pc-holo-bg 18s linear infinite',
     animationPlayState: 'running',
@@ -462,7 +497,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
   return (
     <div
       ref={wrapRef}
-      className={`relative max-w-full ${enableTilt ? "touch-none" : "touch-pan-y"} ${className}`.trim()}
+      className={`relative w-full max-w-full ${enableTilt ? "touch-none" : "touch-pan-y"} ${className}`.trim()}
       style={{ perspective: '900px', transform: 'translate3d(0, 0, 0.1px)', ...cardStyle } as React.CSSProperties}
     >
       {behindGlowEnabled && (
@@ -477,15 +512,16 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
       )}
       <div ref={shellRef} className="relative z-1 group/card">
         <section
-          className="grid relative overflow-hidden"
+          className="mx-auto grid relative overflow-hidden"
           style={{
-            height: 'min(72svh, 480px)',
-            maxHeight: '480px',
-            width: '100%',
-            maxWidth: '100%',
+            height: isDesktopLayout ? 'min(72svh, 480px)' : 'min(62svh, 420px)',
+            maxHeight: isDesktopLayout ? '480px' : '420px',
+            minHeight: 'min(58svh, 360px)',
+            maxWidth: 'min(100%, 24rem)',
             aspectRatio: '0.718',
+            isolation: 'isolate',
             borderRadius: cardRadius,
-            backgroundBlendMode: 'color-dodge, normal, normal, normal',
+            backgroundBlendMode: enableTilt ? 'color-dodge, normal, normal, normal' : 'normal',
             boxShadow:
               'rgba(0, 0, 0, 0.6) calc((var(--pointer-from-left) * 4px) - 2px) calc((var(--pointer-from-top) * 8px) - 3px) 16px -4px',
             transition: 'transform 1s ease',
