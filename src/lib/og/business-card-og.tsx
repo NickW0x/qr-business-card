@@ -3,12 +3,20 @@ import { join } from "node:path";
 
 import { businessCard } from "@/config/business-card";
 
+// Mini ProfileCard dimensions — matches live card aspect ratio (0.718)
+const CARD_WIDTH = 400;
+const CARD_HEIGHT = 557;
+const CARD_RADIUS = 30;
+const FOOTER_INSET = 16;
+const FOOTER_RADIUS = CARD_RADIUS - FOOTER_INSET + 6;
+
 export type BusinessCardOgLayoutProps = {
   name: string;
   title: string;
   company: string;
   handle: string;
   status: string;
+  contactText: string;
   portraitSrc: string;
   logoSrc: string;
   siteLabel: string;
@@ -35,12 +43,12 @@ async function readPublicImageAsDataUri(publicPath: string): Promise<string> {
   return `data:${mime};base64,${data}`;
 }
 
-// Strip protocol for a compact footer label (e.g. opensocket.xyz)
+// Strip protocol for a compact domain label (e.g. opensocket.xyz)
 function getSiteLabel(siteUrl: string): string {
   return siteUrl.replace(/^https?:\/\//, "").replace(/\/$/, "");
 }
 
-// Load portrait + logo and resolve display copy from business-card config
+// Load OG assets and resolve display copy from business-card config
 export async function getBusinessCardOgAssets(): Promise<BusinessCardOgLayoutProps> {
   const { profileCard } = businessCard;
   const portraitPath = profileCard.avatarUrl ?? businessCard.photo;
@@ -57,6 +65,7 @@ export async function getBusinessCardOgAssets(): Promise<BusinessCardOgLayoutPro
     company: profileCard.company ?? businessCard.company,
     handle: profileCard.handle,
     status: profileCard.status,
+    contactText: profileCard.contactText,
     portraitSrc,
     logoSrc,
     siteLabel: getSiteLabel(businessCard.siteUrl),
@@ -64,13 +73,14 @@ export async function getBusinessCardOgAssets(): Promise<BusinessCardOgLayoutPro
   };
 }
 
-// ProfileCard-echo layout — inline styles only (Satori-compatible)
+// Centered mini ProfileCard — all multi-child divs use display:flex (Satori requirement)
 export function BusinessCardOgLayout({
   name,
   title,
   company,
   handle,
   status,
+  contactText,
   portraitSrc,
   logoSrc,
   siteLabel,
@@ -81,6 +91,8 @@ export function BusinessCardOgLayout({
       style={{
         display: "flex",
         flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
         width: "100%",
         height: "100%",
         backgroundColor: "#020617",
@@ -89,170 +101,294 @@ export function BusinessCardOgLayout({
         overflow: "hidden",
       }}
     >
-      {/* Holographic radial glow — echoes profileCard.behindGlowColor */}
-      <div
-        style={{
-          position: "absolute",
-          top: "-20%",
-          right: "-10%",
-          width: "70%",
-          height: "90%",
-          borderRadius: "50%",
-          background: behindGlowColor,
-          filter: "blur(80px)",
-          opacity: 0.55,
-        }}
-      />
-
-      {/* Purple-to-blue gradient accent — echoes profileCard.innerGradient */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: "45%",
-          background:
-            "linear-gradient(145deg, rgba(96, 73, 110, 0.35) 0%, rgba(113, 196, 255, 0.2) 100%)",
-        }}
-      />
-
-      {/* Main content row */}
+      {/* Galaxy background */}
       <div
         style={{
           display: "flex",
-          flex: 1,
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: 1200,
+          height: 630,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: 1200,
+            height: 630,
+            backgroundImage:
+              "radial-gradient(1.5px 1.5px at 8% 12%, rgba(255,255,255,0.9) 50%, transparent 50%), radial-gradient(1px 1px at 22% 38%, rgba(186,230,253,0.8) 50%, transparent 50%), radial-gradient(1.5px 1.5px at 35% 8%, rgba(255,255,255,0.7) 50%, transparent 50%), radial-gradient(1px 1px at 48% 55%, rgba(255,255,255,0.6) 50%, transparent 50%), radial-gradient(1px 1px at 62% 22%, rgba(125,211,252,0.75) 50%, transparent 50%), radial-gradient(1.5px 1.5px at 75% 68%, rgba(255,255,255,0.85) 50%, transparent 50%), radial-gradient(1px 1px at 88% 15%, rgba(255,255,255,0.65) 50%, transparent 50%), radial-gradient(1px 1px at 15% 72%, rgba(255,255,255,0.55) 50%, transparent 50%), radial-gradient(1.5px 1.5px at 55% 82%, rgba(186,230,253,0.7) 50%, transparent 50%), radial-gradient(1px 1px at 92% 48%, rgba(255,255,255,0.6) 50%, transparent 50%)",
+          }}
+        />
+        <div
+          style={{
+            display: "flex",
+            position: "absolute",
+            top: 55,
+            left: 340,
+            width: 520,
+            height: 520,
+            borderRadius: 260,
+            background: behindGlowColor,
+            opacity: 0.5,
+          }}
+        />
+        <div
+          style={{
+            display: "flex",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: 1200,
+            height: 630,
+            background:
+              "linear-gradient(180deg, rgba(2,6,23,0.25) 0%, transparent 35%, transparent 65%, rgba(2,6,23,0.55) 100%)",
+          }}
+        />
+      </div>
+
+      {/* Card + domain label */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
           alignItems: "center",
-          padding: "56px 72px 24px",
           position: "relative",
         }}
       >
-        {/* Circular portrait — same asset as ProfileCard hero */}
+        {/* Mini ProfileCard */}
         <div
           style={{
             display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 240,
-            height: 240,
-            borderRadius: "50%",
-            border: "4px solid rgba(113, 196, 255, 0.45)",
-            boxShadow: "0 0 40px rgba(125, 190, 255, 0.35)",
+            position: "relative",
+            width: CARD_WIDTH,
+            height: CARD_HEIGHT,
+            borderRadius: CARD_RADIUS,
             overflow: "hidden",
-            flexShrink: 0,
-            marginRight: 56,
+            backgroundColor: "rgba(0,0,0,0.9)",
+            boxShadow:
+              "0 24px 64px rgba(0,0,0,0.65), 0 0 48px rgba(56,189,248,0.12)",
           }}
         >
-          <img
-            src={portraitSrc}
-            alt=""
-            width={240}
-            height={240}
-            style={{
-              objectFit: "cover",
-              objectPosition: "center top",
-              width: "100%",
-              height: "100%",
-            }}
-          />
-        </div>
-
-        {/* Name and role */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            flex: 1,
-          }}
-        >
-          <div
-            style={{
-              fontSize: 64,
-              fontWeight: 700,
-              color: "#f8fafc",
-              lineHeight: 1.1,
-              marginBottom: 16,
-              letterSpacing: "-0.02em",
-            }}
-          >
-            {name}
-          </div>
-          <div
-            style={{
-              fontSize: 32,
-              fontWeight: 600,
-              color: "#e2e8f0",
-              lineHeight: 1.3,
-              marginBottom: 10,
-            }}
-          >
-            {title}
-          </div>
-          <div
-            style={{
-              fontSize: 28,
-              fontWeight: 500,
-              color: "#7dd3fc",
-              lineHeight: 1.3,
-              marginBottom: 20,
-            }}
-          >
-            {company}
-          </div>
+          {/* Layer stack — all card visuals */}
           <div
             style={{
               display: "flex",
-              fontSize: 22,
-              fontWeight: 500,
-              color: "#94a3b8",
-              gap: 12,
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: CARD_WIDTH,
+              height: CARD_HEIGHT,
             }}
           >
-            <span>@{handle}</span>
-            <span style={{ color: "#475569" }}>·</span>
-            <span>{status}</span>
+            <div
+              style={{
+                display: "flex",
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: CARD_WIDTH,
+                height: CARD_HEIGHT,
+                backgroundImage:
+                  "linear-gradient(145deg, rgba(96, 73, 110, 0.55) 0%, rgba(113, 196, 255, 0.27) 100%)",
+                backgroundColor: "rgba(0,0,0,0.9)",
+              }}
+            />
+            <img
+              src={portraitSrc}
+              alt=""
+              width={CARD_WIDTH}
+              height={CARD_HEIGHT}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: CARD_WIDTH,
+                height: CARD_HEIGHT,
+                objectFit: "cover",
+                objectPosition: "center bottom",
+              }}
+            />
+            <div
+              style={{
+                display: "flex",
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: CARD_WIDTH,
+                height: 180,
+                background:
+                  "linear-gradient(180deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.4) 55%, transparent 100%)",
+              }}
+            />
+          </div>
+
+          {/* Header text */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: CARD_WIDTH,
+              padding: "40px 24px 16px",
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                fontSize: 36,
+                fontWeight: 700,
+                color: "#ffffff",
+                lineHeight: 1.05,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              {name}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                fontSize: 16,
+                fontWeight: 500,
+                color: "rgba(255,255,255,0.9)",
+                lineHeight: 1.35,
+                marginTop: 8,
+              }}
+            >
+              {title}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                fontSize: 14,
+                fontWeight: 500,
+                color: "rgba(186,230,253,0.85)",
+                lineHeight: 1.35,
+                marginTop: 4,
+                letterSpacing: "0.035em",
+              }}
+            >
+              {company}
+            </div>
+          </div>
+
+          {/* Glass footer */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              position: "absolute",
+              bottom: FOOTER_INSET,
+              left: FOOTER_INSET,
+              width: CARD_WIDTH - FOOTER_INSET * 2,
+              padding: "12px 14px",
+              borderRadius: FOOTER_RADIUS,
+              border: "1px solid rgba(255,255,255,0.25)",
+              background:
+                "linear-gradient(135deg, rgba(0,0,0,0.72) 0%, rgba(15,23,42,0.82) 100%)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.55)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  border: "2px solid rgba(255,255,255,0.25)",
+                  backgroundColor: "#000000",
+                  overflow: "hidden",
+                  marginRight: 10,
+                }}
+              >
+                <img
+                  src={logoSrc}
+                  alt=""
+                  width={32}
+                  height={32}
+                  style={{ objectFit: "contain" }}
+                />
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: "#ffffff",
+                    lineHeight: 1,
+                  }}
+                >
+                  @{handle}
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: "#cbd5e1",
+                    lineHeight: 1,
+                    marginTop: 4,
+                  }}
+                >
+                  {status}
+                </div>
+              </div>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "8px 14px",
+                borderRadius: 8,
+                border: "1px solid rgba(56,189,248,0.4)",
+                background: "rgba(14,165,233,0.25)",
+                fontSize: 11,
+                fontWeight: 700,
+                color: "#ffffff",
+                boxShadow: "0 0 20px rgba(56,189,248,0.25)",
+              }}
+            >
+              {contactText}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Footer — logo badge + site domain */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 72px 48px",
-          position: "relative",
-        }}
-      >
         <div
           style={{
             display: "flex",
-            alignItems: "center",
-            gap: 14,
-          }}
-        >
-          <img src={logoSrc} alt="" width={48} height={48} />
-          <span
-            style={{
-              fontSize: 20,
-              fontWeight: 600,
-              color: "#cbd5e1",
-            }}
-          >
-            {company}
-          </span>
-        </div>
-        <span
-          style={{
-            fontSize: 20,
+            marginTop: 20,
+            fontSize: 15,
             fontWeight: 500,
             color: "#64748b",
+            letterSpacing: "0.04em",
           }}
         >
           {siteLabel}
-        </span>
+        </div>
       </div>
     </div>
   );
