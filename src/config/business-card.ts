@@ -118,7 +118,7 @@ export const businessCard = {
     company: undefined as string | undefined,
     handle: "nick_white",
     status: "Boston, MA",
-    contactText: "Connect",
+    contactText: "Email",
     showUserInfo: true,
 
     contactAction: "mailto" as ContactAction,

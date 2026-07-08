@@ -4,12 +4,15 @@ import path from "path";
 import { businessCard } from "@/config/business-card";
 import { buildVCard } from "@/lib/vcard";
 
-// Read profile photo from public folder and return base64 + mime type
+// Read portrait (preferred) or logo from public folder for the vCard PHOTO field
 async function getPhotoData(): Promise<{
   base64?: string;
   mimeType?: string;
 }> {
-  const photoPath = businessCard.photo.replace(/^\//, "");
+  // Prefer the ProfileCard portrait so Contacts apps show the face, not the logo
+  const photoSrc =
+    businessCard.profileCard.avatarUrl ?? businessCard.photo;
+  const photoPath = photoSrc.replace(/^\//, "");
   const extension = path.extname(photoPath).toLowerCase();
 
   const mimeMap: Record<string, string> = {

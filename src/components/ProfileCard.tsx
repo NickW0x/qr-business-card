@@ -105,9 +105,14 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
 
   // Taller card on sm+; compact height keeps card + contact panel visible on iPhone
   const isDesktopLayout = useMediaQuery('(min-width: 640px)');
+  // Pause holo animation when the user prefers reduced motion
+  const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
 
   const enterTimerRef = useRef<number | null>(null);
   const leaveRafRef = useRef<number | null>(null);
+
+  // Resolved grain — ignore React Bits placeholder default
+  const hasGrain = Boolean(grainUrl && !grainUrl.startsWith('<'));
 
   const tiltEngine = useMemo<TiltEngine | null>(() => {
     if (!enableTilt) return null;
@@ -239,7 +244,11 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
   const handlePointerEnter = useCallback(
     (event: PointerEvent): void => {
       const shell = shellRef.current;
+      const wrap = wrapRef.current;
       if (!shell || !tiltEngine) return;
+
+      // Keep behind-glow visible while the pointer is over the card
+      wrap?.style.setProperty('--card-opacity', '1');
 
       shell.classList.add('active');
       shell.classList.add('entering');
@@ -397,7 +406,8 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
       '--pointer-from-center': '0',
       '--pointer-from-top': '0.5',
       '--pointer-from-left': '0.5',
-      '--card-opacity': '0',
+      // Always visible — previously stuck at 0 when tilt was enabled
+      '--card-opacity': '1',
       '--rotate-x': '0deg',
       '--rotate-y': '0deg',
       '--background-x': '50%',
@@ -437,7 +447,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
       'top calc(200% - (var(--background-y) * 5)) left calc(100% - var(--background-x))',
     filter: `brightness(${iconBrightness}) contrast(${iconContrast}) saturate(${iconSaturate}) opacity(${iconOpacity})`,
     animation: 'pc-holo-bg 18s linear infinite',
-    animationPlayState: 'running',
+    animationPlayState: prefersReducedMotion ? 'paused' : 'running',
     mixBlendMode: iconBlendMode,
     transform: 'translate3d(0, 0, 1px)',
     overflow: 'hidden',
@@ -559,9 +569,29 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
             {/* Glare layer */}
             <div style={glareStyle} />
 
-            {/* Avatar content */}
+            {/* Film grain overlay — uses --grain from config */}
+            {hasGrain ? (
+              <div
+                aria-hidden
+                style={{
+                  backgroundImage: 'var(--grain)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  mixBlendMode: 'overlay',
+                  opacity: 0.4,
+                  transform: 'translate3d(0, 0, 1.2px)',
+                  overflow: 'hidden',
+                  zIndex: 5,
+                  gridArea: '1 / -1',
+                  borderRadius: cardRadius,
+                  pointerEvents: 'none'
+                }}
+              />
+            ) : null}
+
+            {/* Avatar content — full-bleed cover so the portrait reaches the top edge */}
             <div
-              className="overflow-visible"
+              className="absolute inset-0 overflow-hidden"
               style={{
                 transform: 'translateZ(2px)',
                 gridArea: '1 / -1',
@@ -571,7 +601,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
               }}
             >
               <Image
-                className="w-full absolute left-1/2 -bottom-px will-change-transform transition-transform duration-120 ease-out"
+                className="absolute inset-0 h-full w-full object-cover object-top will-change-transform transition-transform duration-120 ease-out"
                 src={avatarUrl}
                 alt={`${name || 'User'} avatar`}
                 width={540}
@@ -579,9 +609,9 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                 sizes="(max-width: 768px) 100vw, 540px"
                 priority
                 style={{
-                  transformOrigin: '50% 100%',
+                  transformOrigin: '50% 50%',
                   transform:
-                    'translateX(calc(-50% + (var(--pointer-from-left) - 0.5) * 2px)) translateZ(0) scaleY(calc(1 + (var(--pointer-from-top) - 0.5) * 0.008)) scaleX(calc(1 + (var(--pointer-from-left) - 0.5) * 0.004))',
+                    'translateX(calc((var(--pointer-from-left) - 0.5) * 2px)) translateZ(0) scaleY(calc(1 + (var(--pointer-from-top) - 0.5) * 0.008)) scaleX(calc(1 + (var(--pointer-from-left) - 0.5) * 0.004))',
                   borderRadius: cardRadius,
                   backfaceVisibility: 'hidden'
                 }}
@@ -646,7 +676,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                       onClick={handleContactClick}
                       style={{ pointerEvents: 'auto', display: 'block', gridArea: 'auto', borderRadius: '8px' }}
                       type="button"
-                      aria-label={`Contact ${name || 'user'}`}
+                      aria-label={`Email ${name || 'user'}`}
                     >
                       {contactText}
                     </button>
@@ -666,13 +696,13 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                 pointerEvents: 'none'
               }}
             >
-              {/* Dark scrim behind header text — clipped to card top radius */}
+              {/* Soft scrim for header readability — light enough to keep the portrait visible */}
               <div
-                className="pointer-events-none absolute inset-x-0 top-0 z-1 h-44 bg-linear-to-b from-black/75 via-black/40 to-transparent"
+                className="pointer-events-none absolute inset-x-0 top-0 z-1 h-36 bg-linear-to-b from-black/45 via-black/20 to-transparent"
                 style={{ borderRadius: `${cardRadius} ${cardRadius} 0 0` }}
               />
               <div className="absolute inset-x-0 top-0 z-2 flex flex-col items-center gap-1.5 px-6 pt-10 pb-4 text-center pointer-events-auto">
-                <h3
+                <h1
                   className="m-0 max-w-[92%] font-semibold leading-none tracking-[-0.02em] text-white"
                   style={{
                     fontSize: 'clamp(1.5rem, 4.5svh, 2.5rem)',
@@ -681,7 +711,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                   }}
                 >
                   {name}
-                </h3>
+                </h1>
                 <div className="flex max-w-[92%] flex-col gap-1">
                   <p
                     className="m-0 text-sm font-medium leading-snug tracking-[0.01em] text-white/90 sm:text-[0.9375rem]"

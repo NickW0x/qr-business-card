@@ -1,8 +1,17 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ComponentType, ReactNode } from "react";
-import { ArrowUpRight, Globe, Mail, Phone, UserPlus } from "lucide-react";
+import {
+  ArrowUpRight,
+  Check,
+  Copy,
+  Globe,
+  Mail,
+  Phone,
+  Share2,
+  UserPlus,
+} from "lucide-react";
 
 import { BrandLogoLoop } from "@/components/business-card/brand-logo-loop";
 import SpotlightCard from "@/components/SpotlightCard";
@@ -128,8 +137,98 @@ function ContactRow({
   );
 }
 
+// Detect Web Share API without a mount effect (SSR-safe via useSyncExternalStore)
+function subscribeShareCapability() {
+  return () => {};
+}
+function getShareSnapshot() {
+  return typeof navigator !== "undefined" && typeof navigator.share === "function";
+}
+function getShareServerSnapshot() {
+  return false;
+}
+
+// Share via Web Share API when available; otherwise copy the card URL
+function ShareCardActions({ cardUrl }: { cardUrl: string }) {
+  const canNativeShare = useSyncExternalStore(
+    subscribeShareCapability,
+    getShareSnapshot,
+    getShareServerSnapshot,
+  );
+  const [copied, setCopied] = useState(false);
+
+  // Reset "Copied" label after a short delay
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 2000);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(cardUrl);
+      setCopied(true);
+    } catch {
+      // Fallback for older browsers without clipboard API
+      const input = document.createElement("input");
+      input.value = cardUrl;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      document.body.removeChild(input);
+      setCopied(true);
+    }
+  }, [cardUrl]);
+
+  const handleShare = useCallback(async () => {
+    try {
+      await navigator.share({
+        title: `${businessCard.name} — Business Card`,
+        text: `${businessCard.title} at ${businessCard.company}`,
+        url: cardUrl,
+      });
+    } catch (error) {
+      // User cancelled the share sheet — ignore AbortError
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      await handleCopy();
+    }
+  }, [cardUrl, handleCopy]);
+
+  return (
+    <div className="flex gap-2">
+      {canNativeShare ? (
+        <Button
+          type="button"
+          className="h-11 flex-1 border border-white/10 bg-white/5 text-sm text-white hover:bg-white/10"
+          size="lg"
+          variant="outline"
+          onClick={handleShare}
+        >
+          <Share2 className="size-4" />
+          Share
+        </Button>
+      ) : null}
+      <Button
+        type="button"
+        className={`h-11 border border-white/10 bg-white/5 text-sm text-white hover:bg-white/10 ${canNativeShare ? "flex-1" : "w-full"}`}
+        size="lg"
+        variant="outline"
+        onClick={handleCopy}
+      >
+        {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+        {copied ? "Copied" : "Copy link"}
+      </Button>
+    </div>
+  );
+}
+
+type ContactActionsProps = {
+  // Absolute /card URL for share + clipboard (resolved on the server)
+  cardUrl: string;
+};
+
 // Contact actions panel below the ProfileCard — wrapped in SpotlightCard
-export function ContactActions() {
+export function ContactActions({ cardUrl }: ContactActionsProps) {
   const displayPhone = businessCard.phone.replace(/^\+1\s?/, "");
 
   return (
@@ -178,16 +277,20 @@ export function ContactActions() {
           <BrandLogoLoop />
         </div>
 
-        <Button
-          className="h-12 w-full border border-white/10 bg-white/5 text-base text-white hover:bg-white/10"
-          size="lg"
-          variant="outline"
-          nativeButton={false}
-          render={<a href="/api/vcard" download />}
-        >
-          <UserPlus className="size-5" />
-          Save Contact
-        </Button>
+        <div className="space-y-2.5">
+          {/* Primary CTA — save to phone contacts */}
+          <Button
+            className="h-12 w-full bg-sky-500 text-base font-semibold text-slate-950 hover:bg-sky-400"
+            size="lg"
+            variant="default"
+            nativeButton={false}
+            render={<a href="/api/vcard" download />}
+          >
+            <UserPlus className="size-5" />
+            Save Contact
+          </Button>
+          <ShareCardActions cardUrl={cardUrl} />
+        </div>
       </div>
     </SpotlightCard>
   );
