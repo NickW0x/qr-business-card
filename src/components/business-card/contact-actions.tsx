@@ -59,7 +59,8 @@ function ContactRow({
   valueClassName = "truncate",
 }: {
   href: string;
-  icon: ComponentType<{ className?: string }>;
+  // Lucide icons accept className + strokeWidth for line weight tuning
+  icon: ComponentType<{ className?: string; strokeWidth?: number }>;
   label: string;
   value: string;
   external?: boolean;
