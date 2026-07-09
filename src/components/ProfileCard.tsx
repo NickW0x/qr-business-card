@@ -654,12 +654,13 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                         'linear-gradient(135deg, rgba(56,189,248,0.14) 0%, rgba(255,255,255,0.08) 50%, rgba(0,0,0,0.1) 100%)'
                     }}
                   />
-                  <div className="relative z-1 flex w-full min-w-0 items-center justify-between gap-2">
-                    <div className="flex min-w-0 flex-1 items-center gap-3 transition-opacity duration-300 group-hover/footer:opacity-100 group-hover/card:opacity-100">
-                      {/* Larger mini logo — balances the stacked Email/Book CTAs */}
-                      <div className="size-14 shrink-0 overflow-hidden rounded-full border-2 border-white/25 bg-black shadow-sm transition-all duration-300 group-hover/footer:border-sky-400/55 group-hover/footer:shadow-[0_0_16px_rgba(56,189,248,0.55),0_0_6px_rgba(56,189,248,0.35)] group-hover/card:border-sky-400/45 group-hover/card:shadow-[0_0_12px_rgba(56,189,248,0.4),0_0_4px_rgba(56,189,248,0.25)]">
+                  {/* Identity + CTAs — text truncates; CTAs never overlap handle/status */}
+                  <div className="relative z-1 flex w-full min-w-0 items-center gap-2 sm:gap-3">
+                    <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3 transition-opacity duration-300 group-hover/footer:opacity-100 group-hover/card:opacity-100">
+                      {/* Compact avatar on narrow cards so handle/status keep readable width */}
+                      <div className="size-11 shrink-0 overflow-hidden rounded-full border-2 border-white/25 bg-black shadow-sm transition-all duration-300 sm:size-14 group-hover/footer:border-sky-400/55 group-hover/footer:shadow-[0_0_16px_rgba(56,189,248,0.55),0_0_6px_rgba(56,189,248,0.35)] group-hover/card:border-sky-400/45 group-hover/card:shadow-[0_0_12px_rgba(56,189,248,0.4),0_0_4px_rgba(56,189,248,0.25)]">
                         <Image
-                          className="h-full w-full rounded-full object-contain p-1.5 transition-[filter] duration-300 group-hover/footer:brightness-110 group-hover/card:brightness-105"
+                          className="h-full w-full rounded-full object-contain p-1 sm:p-1.5 transition-[filter] duration-300 group-hover/footer:brightness-110 group-hover/card:brightness-105"
                           src={miniAvatarUrl || avatarUrl}
                           alt={`${name || 'User'} mini avatar`}
                           width={56}
@@ -672,11 +673,12 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                           }}
                         />
                       </div>
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <div className="text-sm font-bold leading-none text-white transition-colors duration-300 group-hover/footer:text-white group-hover/card:text-slate-50">
+                      {/* Truncate (not wrap) so CTAs never crush handle/status into a 1-char column */}
+                      <div className="min-w-0 flex-1 space-y-1 overflow-hidden">
+                        <div className="truncate text-xs font-bold leading-none text-white transition-colors duration-300 sm:text-sm group-hover/footer:text-white group-hover/card:text-slate-50">
                           @{handle}
                         </div>
-                        <div className="text-xs font-medium leading-none text-slate-300 transition-colors duration-300 group-hover/footer:text-slate-100 group-hover/card:text-slate-200">
+                        <div className="truncate text-[11px] font-medium leading-none text-slate-300 transition-colors duration-300 sm:text-xs group-hover/footer:text-slate-100 group-hover/card:text-slate-200">
                           {status}
                         </div>
                       </div>
@@ -684,7 +686,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                     {/* Stacked CTAs — Email on top, Book (Cal.com) below */}
                     <div className="relative z-1 flex shrink-0 flex-col items-stretch gap-1.5">
                       <button
-                        className="cursor-pointer rounded-lg border border-sky-400/40 bg-sky-500/25 px-3 py-2 text-[11px] font-bold text-white shadow-[0_0_20px_rgba(56,189,248,0.25)] transition-all duration-200 ease-out hover:-translate-y-px hover:border-sky-300/70 hover:bg-sky-500/50 hover:shadow-[0_0_28px_rgba(56,189,248,0.45)] group-hover/footer:border-sky-300/55 group-hover/footer:bg-sky-500/35 group-hover/card:border-sky-400/50 group-hover/card:bg-sky-500/30"
+                        className="cursor-pointer whitespace-nowrap rounded-lg border border-sky-400/40 bg-sky-500/25 px-2.5 py-1.5 text-[11px] font-bold text-white shadow-[0_0_20px_rgba(56,189,248,0.25)] transition-all duration-200 ease-out hover:-translate-y-px hover:border-sky-300/70 hover:bg-sky-500/50 hover:shadow-[0_0_28px_rgba(56,189,248,0.45)] sm:px-3 sm:py-2 group-hover/footer:border-sky-300/55 group-hover/footer:bg-sky-500/35 group-hover/card:border-sky-400/50 group-hover/card:bg-sky-500/30"
                         onClick={handleContactClick}
                         style={{ pointerEvents: 'auto', display: 'block', gridArea: 'auto', borderRadius: '8px' }}
                         type="button"
@@ -694,7 +696,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                       </button>
                       {onBookingClick && bookingText ? (
                         <button
-                          className="cursor-pointer rounded-lg border border-sky-400/40 bg-sky-500/25 px-3 py-2 text-[11px] font-bold text-white shadow-[0_0_20px_rgba(56,189,248,0.25)] transition-all duration-200 ease-out hover:-translate-y-px hover:border-sky-300/70 hover:bg-sky-500/50 hover:shadow-[0_0_28px_rgba(56,189,248,0.45)] group-hover/footer:border-sky-300/55 group-hover/footer:bg-sky-500/35 group-hover/card:border-sky-400/50 group-hover/card:bg-sky-500/30"
+                          className="cursor-pointer whitespace-nowrap rounded-lg border border-sky-400/40 bg-sky-500/25 px-2.5 py-1.5 text-[11px] font-bold text-white shadow-[0_0_20px_rgba(56,189,248,0.25)] transition-all duration-200 ease-out hover:-translate-y-px hover:border-sky-300/70 hover:bg-sky-500/50 hover:shadow-[0_0_28px_rgba(56,189,248,0.45)] sm:px-3 sm:py-2 group-hover/footer:border-sky-300/55 group-hover/footer:bg-sky-500/35 group-hover/card:border-sky-400/50 group-hover/card:bg-sky-500/30"
                           onClick={handleBookingClick}
                           style={{ pointerEvents: 'auto', display: 'block', gridArea: 'auto', borderRadius: '8px' }}
                           type="button"
