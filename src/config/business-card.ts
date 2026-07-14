@@ -38,7 +38,7 @@ export const businessCard = {
   siteUrl: "https://nickwhite.opensocket.xyz",
   bio: "Founder and Chief Engineer at HelioNova. Designing and building AI systems.",
   email: "nw@helionova.io",
-  phone: "(781) 822-0588",
+  phone: "(339) 234-0959",
   website: "https://helionova.io",
   bookingUrl,
   bookingText,
