@@ -1,0 +1,5 @@
+# Allow social crawlers to fetch the generated Open Graph image
+# https://vercel.com/docs/og-image-generation
+User-agent: *
+Allow: /
+Allow: /card/opengraph-image

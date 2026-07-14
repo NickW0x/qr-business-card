@@ -13,11 +13,21 @@ export const metadata: Metadata = {
     description: `${businessCard.title} at ${businessCard.company}`,
     type: "profile",
     url: `${getSiteUrl()}/card`,
+    // Absolute URL via metadataBase — overrides root layout's 400×400 logo
+    images: [
+      {
+        url: "/card/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: `${businessCard.name} — Business Card`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: businessCard.name,
     description: `${businessCard.title} at ${businessCard.company}`,
+    images: ["/card/opengraph-image"],
   },
 };
 
