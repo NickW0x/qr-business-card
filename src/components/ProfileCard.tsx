@@ -729,7 +729,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
               />
               <div className="absolute inset-x-0 top-0 z-2 flex flex-col items-center gap-1.5 px-6 pt-10 pb-4 text-center pointer-events-auto">
                 <h1
-                  className="m-0 max-w-[92%] font-semibold leading-none tracking-[-0.02em] text-white"
+                  className="m-0 max-w-[92%] font-semibold leading-none tracking-normal text-white"
                   style={{
                     fontSize: 'clamp(1.5rem, 4.5svh, 2.5rem)',
                     textShadow:
@@ -740,7 +740,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                 </h1>
                 <div className="flex max-w-[92%] flex-col gap-1">
                   <p
-                    className="m-0 text-sm font-medium leading-snug tracking-[0.01em] text-white/90 sm:text-[0.9375rem]"
+                    className="m-0 text-sm font-medium leading-snug tracking-normal text-white/90 sm:text-[0.9375rem]"
                     style={{ textShadow: '0 1px 12px rgba(0,0,0,0.8)' }}
                   >
                     {title}

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Montserrat } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 
 import { businessCard } from "@/config/business-card";
 import { getSiteUrl } from "@/lib/site-url";
@@ -7,12 +7,7 @@ import { Analytics } from "@vercel/analytics/next"
 
 import "./globals.css";
 
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
+// Single variable mono face — avoids unused multi-weight preloads
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -52,7 +47,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${montserrat.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-slate-950">{children}</body>
       <Analytics />

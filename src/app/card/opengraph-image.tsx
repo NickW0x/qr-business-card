@@ -10,10 +10,10 @@ export const alt = `${businessCard.name} — Business Card`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-// Fetch a Montserrat weight from Google Fonts for Satori rendering
-async function loadMontserrat(weight: number): Promise<ArrayBuffer> {
+// Fetch a JetBrains Mono weight from Google Fonts for Satori (matches site mono look)
+async function loadJetBrainsMono(weight: number): Promise<ArrayBuffer> {
   const css = await fetch(
-    `https://fonts.googleapis.com/css2?family=Montserrat:wght@${weight}`,
+    `https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@${weight}`,
     {
       headers: {
         // Google Fonts returns woff/ttf URLs only for a browser-like user agent
@@ -27,7 +27,7 @@ async function loadMontserrat(weight: number): Promise<ArrayBuffer> {
   )?.[1];
 
   if (!resource) {
-    throw new Error(`Failed to load Montserrat weight ${weight}`);
+    throw new Error(`Failed to load JetBrains Mono weight ${weight}`);
   }
 
   return fetch(resource).then((res) => res.arrayBuffer());
@@ -37,17 +37,17 @@ async function loadMontserrat(weight: number): Promise<ArrayBuffer> {
 export default async function Image() {
   const [assets, medium, semibold, bold] = await Promise.all([
     getBusinessCardOgAssets(),
-    loadMontserrat(500),
-    loadMontserrat(600),
-    loadMontserrat(700),
+    loadJetBrainsMono(500),
+    loadJetBrainsMono(600),
+    loadJetBrainsMono(700),
   ]);
 
   return new ImageResponse(<BusinessCardOgLayout {...assets} />, {
     ...size,
     fonts: [
-      { name: "Montserrat", data: medium, weight: 500, style: "normal" },
-      { name: "Montserrat", data: semibold, weight: 600, style: "normal" },
-      { name: "Montserrat", data: bold, weight: 700, style: "normal" },
+      { name: "JetBrains Mono", data: medium, weight: 500, style: "normal" },
+      { name: "JetBrains Mono", data: semibold, weight: 600, style: "normal" },
+      { name: "JetBrains Mono", data: bold, weight: 700, style: "normal" },
     ],
   });
 }

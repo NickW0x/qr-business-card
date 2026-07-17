@@ -20,7 +20,7 @@ export function ProfileIdentity({
         {eyebrow}
       </p>
       <h1
-        className="m-0 font-semibold leading-none tracking-[-0.02em] text-white"
+        className="m-0 font-semibold leading-none tracking-normal text-white"
         style={{
           fontSize: "clamp(1.75rem, 5vw, 2.5rem)",
           textShadow:
@@ -31,7 +31,7 @@ export function ProfileIdentity({
       </h1>
       <div className="flex flex-col gap-1">
         <p
-          className="m-0 text-sm font-medium leading-snug tracking-[0.01em] text-white/90 sm:text-[0.9375rem]"
+          className="m-0 text-sm font-medium leading-snug tracking-normal text-white/90 sm:text-[0.9375rem]"
           style={{ textShadow: "0 1px 12px rgba(0,0,0,0.75)" }}
         >
           {title}

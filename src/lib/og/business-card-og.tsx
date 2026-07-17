@@ -204,7 +204,7 @@ export function BusinessCardOgLayout({
         width: OG_WIDTH,
         height: OG_HEIGHT,
         backgroundColor: "#020617",
-        fontFamily: "Montserrat",
+        fontFamily: "JetBrains Mono",
         position: "relative",
         overflow: "hidden",
       }}
