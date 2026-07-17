@@ -3,7 +3,7 @@ import { Geist_Mono } from "next/font/google";
 
 import { businessCard } from "@/config/business-card";
 import { getSiteUrl } from "@/lib/site-url";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/next";
 
 import "./globals.css";
 
@@ -47,10 +47,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistMono.variable} h-full antialiased`}
+      className={`${geistMono.variable} ${geistMono.className} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-950">{children}</body>
-      <Analytics />
+      <body className="min-h-full flex flex-col bg-slate-950">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

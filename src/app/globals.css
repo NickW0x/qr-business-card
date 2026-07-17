@@ -125,6 +125,7 @@
     @apply bg-background text-foreground;
   }
   html {
-    @apply font-sans;
+    /* Direct next/font variable — ensures the preloaded .woff2 is consumed */
+    font-family: var(--font-geist-mono), ui-monospace, monospace;
   }
 }
