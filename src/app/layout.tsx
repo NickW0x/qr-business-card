@@ -3,6 +3,7 @@ import { Geist_Mono, Montserrat } from "next/font/google";
 
 import { businessCard } from "@/config/business-card";
 import { getSiteUrl } from "@/lib/site-url";
+import { Analytics } from "@vercel/analytics/next"
 
 import "./globals.css";
 
@@ -54,6 +55,7 @@ export default function RootLayout({
       className={`${montserrat.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-slate-950">{children}</body>
+      <Analytics />
     </html>
   );
 }
